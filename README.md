@@ -60,13 +60,24 @@ Forced by AE2 8.x:
 - The upgrade and toolbox panels are drawn from AE2's new `extra_panels.png`.
 - AE2 wrenches no longer rotate or dismantle foreign blocks by themselves, the mod handles both for its machines.
 
+Fixed compared to the original, for multiplayer servers:
+
+- Machine contents and network tool cards can no longer be duplicated or lost through the GUI.
+- A machine broken by a network security violation keeps its contents in the dropped block.
+- The wireless connector, the setup kit and the visualiser no longer load chunks, and an unloaded link stops drawing power.
+- The wrench dismantle fires a block break event, so claim and protection mods can stop it.
+- JEI recipe transfer stays within one network packet, even for recipes with very large tags.
+- The Pattern Encoder follows recipe changes from `/reload`, CraftTweaker and KubeJS.
+
 Kept on purpose, because the original behaves this way:
 
-- A machine broken by a network security violation drops itself but not its inventory.
 - The Advanced Inscriber is strict about which press goes on top and which at the bottom, and does not take name presses.
 - An unlocked press can only be taken out by automation while a job is running, although the tooltip says otherwise.
-- If one end of a wireless link is unloaded, the other keeps showing the link and drawing power until it loads again.
 - A machine with an empty power buffer can take up to 100 ticks to start.
+
+## Compatibility
+
+Tested on Forge 36.2.42 with AE2 8.4.7: JEI 7.7.1 and 7.8.1, Hwyla 1.10.11, CraftTweaker 7.1.2 and KubeJS 1605.3.19 (adding and removing crafting and inscriber recipes, `/reload`), data packs, Mekanism 10.1.2 and Pretty Pipes 1.9.8.
 
 ## Building
 

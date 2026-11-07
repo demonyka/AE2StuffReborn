@@ -12,11 +12,9 @@ import appeng.api.util.AEColor;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
 import net.bdew.ae2stuff.AE2Defs;
-import net.bdew.ae2stuff.misc.ItemUtils;
 import net.bdew.ae2stuff.misc.MachineBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -54,6 +52,7 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
             IGridNode gridNode = getNode();
             if (placingPlayer != null)
                 gridNode.setPlayerID(Security.getPlayerId(placingPlayer));
+            placingPlayer = null;
             gridNode.updateState();
             initialized = true;
         }
@@ -94,11 +93,11 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
     }
 
     /**
-     * Updates the active texture. Destroying the node on chunk unload notifies the tile, and touching the
-     * block at that point would load the chunk right back.
+     * Updates the active texture. Destroying a node on chunk unload notifies the tiles next to it, possibly before
+     * Forge unloads them, and touching their block at that point would load the chunk right back.
      */
     protected void setBlockActive(boolean active) {
-        if (world != null && !world.isRemote && !chunkUnloaded)
+        if (world != null && !world.isRemote && !chunkUnloaded && world.isBlockLoaded(pos))
             MachineBlock.setActive(world, pos, active);
     }
 
@@ -125,7 +124,8 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
 
     @Nullable
     public IGridNode getNode() {
-        if (world == null || world.isRemote)
+        // A removed tile must not create a node that nothing would ever destroy
+        if (world == null || world.isRemote || isRemoved())
             return null;
         if (node == null) {
             node = AE2Defs.api().grid().createGridNode(this);
@@ -166,8 +166,8 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
 
     @Override
     public void securityBreak() {
-        ItemUtils.throwItemAt(world, pos, new ItemStack(getBlockState().getBlock()));
-        world.removeBlock(pos, false);
+        // The original meant to drop the contents here too, breaking the block keeps them in the dropped item
+        world.destroyBlock(pos, true);
     }
 
     // IGridBlock

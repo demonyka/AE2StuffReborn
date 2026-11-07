@@ -9,10 +9,10 @@ import net.bdew.ae2stuff.network.MsgSetRecipe;
 import net.bdew.ae2stuff.network.NetHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerEncoder> {
     @Override
@@ -27,22 +27,22 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerE
         if (!doTransfer)
             return null;
 
-        CompoundNBT data = new CompoundNBT();
-        int slot = 0;
+        List<List<ItemStack>> slots = new ArrayList<>();
         for (IGuiIngredient<ItemStack> ingredient : recipeLayout.getItemStacks().getGuiIngredients().values()) {
             if (!ingredient.isInput())
                 continue;
-            ListNBT items = new ListNBT();
+            List<ItemStack> options = new ArrayList<>();
             for (ItemStack stack : ingredient.getAllIngredients()) {
+                if (stack == null || stack.isEmpty())
+                    continue;
                 ItemStack copy = stack.copy();
                 copy.setCount(1);
-                items.add(copy.write(new CompoundNBT()));
+                options.add(copy);
             }
-            data.put(Integer.toString(slot), items);
-            slot++;
+            slots.add(options);
         }
 
-        NetHandler.sendToServer(new MsgSetRecipe(data));
+        NetHandler.sendToServer(MsgSetRecipe.fit(slots));
         return null;
     }
 }

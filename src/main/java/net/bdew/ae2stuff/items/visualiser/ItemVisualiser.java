@@ -94,7 +94,9 @@ public class ItemVisualiser extends ItemLocationStore {
             return;
 
         PosAndDimension boundLoc = getLocation(stack);
-        if (boundLoc == null || !boundLoc.dim.equals(PosAndDimension.dimensionOf(world)) || !VisualiserPlayerTracker.needToUpdate(player, boundLoc))
+        // A bound network in an unloaded chunk is not loaded just to be drawn
+        if (boundLoc == null || !boundLoc.dim.equals(PosAndDimension.dimensionOf(world)) || !world.isBlockLoaded(boundLoc.pos)
+                || !VisualiserPlayerTracker.needToUpdate(player, boundLoc))
             return;
 
         TileEntity tile = world.getTileEntity(boundLoc.pos);

@@ -17,6 +17,8 @@ public class SlotFakeEncodedPattern extends Slot implements SlotClickable {
 
     @Override
     public ItemStack onClick(ClickType clickType, int button, PlayerEntity player) {
+        // A recipe removed by /reload must not turn a blank pattern into a dead one
+        te.revalidateRecipe();
         ItemStack encoded = te.getStackInSlot(getSlotIndex());
         if (!encoded.isEmpty()) {
             if (clickType == ClickType.PICKUP) {

@@ -76,6 +76,12 @@ public class InventoryHandlerAdapter implements IInventory {
 
     @Override
     public void markDirty() {
+        // Slots change stacks in place, setting them again makes handlers that save on change (AE2) save
+        if (handler instanceof IItemHandlerModifiable) {
+            IItemHandlerModifiable modifiable = (IItemHandlerModifiable) handler;
+            for (int i = 0; i < modifiable.getSlots(); i++)
+                modifiable.setStackInSlot(i, modifiable.getStackInSlot(i));
+        }
     }
 
     @Override

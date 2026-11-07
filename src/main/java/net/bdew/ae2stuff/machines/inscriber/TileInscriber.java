@@ -57,7 +57,8 @@ public class TileInscriber extends PoweredTile {
                 bottomLocked = locked;
                 break;
             default:
-                throw new IllegalArgumentException("Invalid slot");
+                // Only a modified client sends anything else
+                return;
         }
         markSaveDirty();
     }

@@ -32,6 +32,7 @@ public class ContainerEncoder extends BaseContainer {
         addSlot(new SlotFakeEncodedPattern(te, TileEncoder.SLOT_ENCODED, 143, 53));
 
         bindPlayerInventory(inventory, 8, 84, 142);
+        te.revalidateRecipe();
     }
 
     public static ContainerEncoder fromNetwork(int id, PlayerInventory inventory, PacketBuffer data) {
@@ -52,6 +53,8 @@ public class ContainerEncoder extends BaseContainer {
 
     @Override
     public ItemStack slotClick(int slotNum, int button, ClickType clickType, PlayerEntity player) {
+        if (!canInteractWith(player))
+            return ItemStack.EMPTY;
         if (slotNum >= 0 && slotNum < inventorySlots.size() && getSlot(slotNum) == patternSlot && button == 0 && clickType == ClickType.PICKUP) {
             ItemStack playerStack = player.inventory.getItemStack();
             ItemStack slotStack = patternSlot.getStack();

@@ -84,13 +84,19 @@ public class ItemWirelessKit extends ItemLocationStore {
         } else if (pos.equals(otherLoc.pos)) {
             // Same block - clear the location
             clearLocation(stack);
+        } else if (!world.isBlockLoaded(otherLoc.pos)) {
+            // An unloaded connector has no network yet, so its security can't be checked
+            status(player, TextFormatting.RED, "ae2stuff.wireless.tool.failed");
         } else {
             TileEntity otherTile = world.getTileEntity(otherLoc.pos);
             if (otherTile instanceof TileWireless) {
                 // The other tile is still around
                 TileWireless other = (TileWireless) otherTile;
-                // Check that the player can modify it too
-                if (!Security.playerHasPermission(other.getNode().getGrid(), pid, SecurityPermissions.BUILD)) {
+                if (tile.getNode().getGrid() == null || other.getNode().getGrid() == null) {
+                    // A connector that has not ticked yet has no network, security would pass unchecked
+                    status(player, TextFormatting.RED, "ae2stuff.wireless.tool.failed");
+                } else if (!Security.playerHasPermission(other.getNode().getGrid(), pid, SecurityPermissions.BUILD)) {
+                    // Check that the player can modify it too
                     status(player, TextFormatting.RED, "ae2stuff.wireless.tool.security.player");
                 } else {
                     // Player can modify both sides - unlink current connections if any

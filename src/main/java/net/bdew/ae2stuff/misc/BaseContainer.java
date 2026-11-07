@@ -28,6 +28,9 @@ public abstract class BaseContainer extends Container {
 
     @Override
     public ItemStack slotClick(int slotNum, int button, ClickType clickType, PlayerEntity player) {
+        // Vanilla only checks this once per tick, clicks sent right after the block broke would still move items
+        if (!canInteractWith(player))
+            return ItemStack.EMPTY;
         if (slotNum >= 0 && slotNum < inventorySlots.size()) {
             Slot slot = getSlot(slotNum);
             if (slot instanceof SlotClickable)

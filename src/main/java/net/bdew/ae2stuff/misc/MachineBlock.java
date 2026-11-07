@@ -32,6 +32,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -91,9 +92,16 @@ public abstract class MachineBlock extends Block {
             ItemStack stack = player.inventory.getCurrentItem();
             WrenchHandler wrench = WrenchRegistry.findWrench(player, stack, pos);
             if (wrench != null) {
-                wrench.doWrench(player, stack, pos);
-                if (!world.isRemote)
+                if (!world.isRemote) {
+                    // Lets protection and logging mods see the dismantle like any other break
+                    if (player instanceof ServerPlayerEntity) {
+                        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+                        if (ForgeHooks.onBlockBreakEvent(world, serverPlayer.interactionManager.getGameType(), serverPlayer, pos) == -1)
+                            return ActionResultType.FAIL;
+                    }
+                    wrench.doWrench(player, stack, pos);
                     world.destroyBlock(pos, true);
+                }
                 return ActionResultType.func_233537_a_(world.isRemote);
             }
             return ActionResultType.PASS;

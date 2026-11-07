@@ -29,7 +29,7 @@ public final class MsgSetLock {
         NetworkEvent.Context ctx = context.get();
         ServerPlayerEntity player = ctx.getSender();
         ctx.enqueueWork(() -> {
-            if (player != null && player.openContainer instanceof ContainerInscriber)
+            if (player != null && player.openContainer instanceof ContainerInscriber && player.openContainer.canInteractWith(player))
                 ((ContainerInscriber) player.openContainer).te.setLock(slot, lock);
         });
         return true;

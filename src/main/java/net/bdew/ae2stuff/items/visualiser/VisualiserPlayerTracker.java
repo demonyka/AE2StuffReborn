@@ -31,7 +31,8 @@ public final class VisualiserPlayerTracker {
     public static boolean needToUpdate(PlayerEntity player, PosAndDimension loc) {
         long now = player.world.getGameTime();
         Entry last = MAP.get(player);
-        if (last == null || !last.loc.equals(loc) || last.last < now - 100) {
+        // A new location updates right away, but switching between tools still can't walk a grid every tick
+        if (last == null || (!last.loc.equals(loc) && last.last < now - 10) || last.last < now - 100) {
             MAP.put(player, new Entry(loc, now));
             return true;
         }

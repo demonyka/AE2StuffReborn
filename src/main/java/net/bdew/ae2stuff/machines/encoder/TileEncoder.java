@@ -1,5 +1,7 @@
 package net.bdew.ae2stuff.machines.encoder;
 
+import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
 import appeng.api.networking.events.MENetworkEventSubscribe;
 import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.storage.IStorageGrid;
@@ -16,10 +18,12 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 public class TileEncoder extends InventoryGridTile {
     public static final int SLOT_RECIPE_COUNT = 9;
@@ -29,12 +33,18 @@ public class TileEncoder extends InventoryGridTile {
 
     private static final int[] SIDED_SLOTS = {SLOT_PATTERNS};
 
+    // Items a client asks for that are not in ME storage keep their tag only up to this size
+    private static final int MAX_UNTRUSTED_TAG_LENGTH = 4096;
+
+    // The recipe search is expensive in big packs, so it runs once per change of the recipe slots
+    @Nullable
+    private ICraftingRecipe recipe;
+    @Nullable
+    private RecipeManager recipeSource;
+    private boolean recipeKnown;
+
     public TileEncoder() {
         super(Registration.ENCODER_TILE.get(), 12);
-    }
-
-    private ItemStack getResult() {
-        return getStackInSlot(SLOT_RESULT);
     }
 
     private ItemStack[] getRecipeStacks() {
@@ -65,12 +75,72 @@ public class TileEncoder extends InventoryGridTile {
     }
 
     /**
+     * The recipe for the current grid. A new recipe manager, after /reload or a script reload, triggers a new search.
+     */
+    @Nullable
+    private ICraftingRecipe findRecipe() {
+        RecipeManager manager = world.getRecipeManager();
+        if (!recipeKnown || manager != recipeSource) {
+            recipe = manager.getRecipe(IRecipeType.CRAFTING, makeCraftingInventory(), world).orElse(null);
+            recipeSource = manager;
+            recipeKnown = true;
+        }
+        return recipe;
+    }
+
+    /**
      * Updates the result slot from the recipe slots.
      */
     public void updateRecipe() {
-        CraftingInventory crafting = makeCraftingInventory();
-        Optional<ICraftingRecipe> recipe = world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, crafting, world);
-        setInventorySlotContents(SLOT_RESULT, recipe.map(r -> r.getCraftingResult(crafting)).orElse(ItemStack.EMPTY));
+        ICraftingRecipe current = findRecipe();
+        setInventorySlotContents(SLOT_RESULT, current != null ? current.getCraftingResult(makeCraftingInventory()) : ItemStack.EMPTY);
+    }
+
+    /**
+     * Refreshes the result when the recipes changed since it was computed.
+     */
+    public void revalidateRecipe() {
+        if (world != null && !world.isRemote && (!recipeKnown || recipeSource != world.getRecipeManager()))
+            updateRecipe();
+    }
+
+    /**
+     * Sets the recipe slots from the ingredient options sent by JEI, with a single recipe search.
+     */
+    public void setRecipeFromNetwork(List<List<ItemStack>> slots) {
+        for (int i = 0; i < SLOT_RECIPE_COUNT; i++) {
+            List<ItemStack> options = i < slots.size() ? slots.get(i) : null;
+            inv.set(i, options == null || options.isEmpty() ? ItemStack.EMPTY : findMatchingRecipeStack(options));
+        }
+        recipeKnown = false;
+        updateRecipe();
+    }
+
+    @Override
+    public void setInventorySlotContents(int slot, ItemStack stack) {
+        if (slot < SLOT_RECIPE_COUNT)
+            recipeKnown = false;
+        super.setInventorySlotContents(slot, stack);
+    }
+
+    @Override
+    public ItemStack decrStackSize(int slot, int count) {
+        if (slot < SLOT_RECIPE_COUNT)
+            recipeKnown = false;
+        return super.decrStackSize(slot, count);
+    }
+
+    @Override
+    public ItemStack removeStackFromSlot(int slot) {
+        if (slot < SLOT_RECIPE_COUNT)
+            recipeKnown = false;
+        return super.removeStackFromSlot(slot);
+    }
+
+    @Override
+    protected void loadData(CompoundNBT tag) {
+        super.loadData(tag);
+        recipeKnown = false;
     }
 
     @Override
@@ -84,29 +154,51 @@ public class TileEncoder extends InventoryGridTile {
      * AE2 8.x patterns reference the recipe by id, so unlike on 1.12 they can't be written from the slots alone.
      */
     private ItemStack encodePattern() {
-        if (getResult().isEmpty() || isRecipeEmpty() || getStackInSlot(SLOT_PATTERNS).isEmpty())
+        if (getStackInSlot(SLOT_RESULT).isEmpty() || isRecipeEmpty() || getStackInSlot(SLOT_PATTERNS).isEmpty())
             return ItemStack.EMPTY;
-        return world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, makeCraftingInventory(), world)
-                .map(recipe -> AE2Defs.api().crafting().encodeCraftingPattern(null, recipe, getRecipeStacks(), getResult(), true))
-                .orElse(ItemStack.EMPTY);
+        ICraftingRecipe current = findRecipe();
+        if (current == null)
+            return ItemStack.EMPTY;
+        // The output comes from the recipe itself, the result slot can be older than a recipe reload
+        ItemStack output = current.getCraftingResult(makeCraftingInventory());
+        if (output.isEmpty())
+            return ItemStack.EMPTY;
+        return AE2Defs.api().crafting().encodeCraftingPattern(null, current, getRecipeStacks(), output, true);
     }
 
     public ItemStack findMatchingRecipeStack(List<ItemStack> stacks) {
-        IItemStorageChannel channel = AE2Defs.api().storage().getStorageChannel(IItemStorageChannel.class);
-        IStorageGrid storageGrid = node.getGrid().getCache(IStorageGrid.class);
-        IItemList<IAEItemStack> storage = storageGrid.getInventory(channel).getStorageList();
-        for (ItemStack stack : stacks) {
-            if (stack.isEmpty())
-                continue;
-            IAEItemStack found = storage.findPrecise(channel.createStack(stack));
-            if (found != null) {
-                ItemStack result = found.createItemStack();
-                result.setCount(1);
-                return result;
+        IGridNode gridNode = getNode();
+        IGrid grid = gridNode != null ? gridNode.getGrid() : null;
+        if (grid != null) {
+            IItemStorageChannel channel = AE2Defs.api().storage().getStorageChannel(IItemStorageChannel.class);
+            IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
+            IItemList<IAEItemStack> storage = storageGrid.getInventory(channel).getStorageList();
+            for (ItemStack stack : stacks) {
+                if (stack.isEmpty())
+                    continue;
+                IAEItemStack found = storage.findPrecise(channel.createStack(stack));
+                if (found != null) {
+                    ItemStack result = found.createItemStack();
+                    result.setCount(1);
+                    return result;
+                }
             }
         }
         // Get the first variant if we can't find any matches
-        return stacks.get(0);
+        for (ItemStack stack : stacks) {
+            if (!stack.isEmpty())
+                return untrustedGhost(stack);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack untrustedGhost(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        copy.setCount(1);
+        CompoundNBT tag = copy.getTag();
+        if (tag != null && tag.toString().length() > MAX_UNTRUSTED_TAG_LENGTH)
+            copy.setTag(null);
+        return copy;
     }
 
     // Inventory stuff

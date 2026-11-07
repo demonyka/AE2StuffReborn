@@ -74,8 +74,19 @@ public class TileWireless extends GridTile {
     @Override
     protected void serverTick() {
         super.serverTick();
-        if (connection == null && link != null)
+        if (connection != null && !isConnectionAlive()) {
+            // The other end unloaded and destroyed the connection with its node
+            connection = null;
+            setIdlePowerUse(0D);
+            setBlockActive(false);
+        }
+        // An unloaded other end reconnects by itself once its chunk loads, so there is no need to load it from here
+        if (connection == null && link != null && world.isBlockLoaded(link))
             setupConnection();
+    }
+
+    private boolean isConnectionAlive() {
+        return connection != null && node != null && node.getConnections().contains(connection);
     }
 
     public boolean doLink(TileWireless other) {
@@ -121,13 +132,16 @@ public class TileWireless extends GridTile {
     }
 
     private void breakConnection() {
-        if (connection != null)
+        // Destroying a connection twice makes AE2 register an orphan grid that ticks forever
+        if (isConnectionAlive())
             connection.destroy();
+        IGridConnection old = connection;
         connection = null;
         setIdlePowerUse(0D);
         TileWireless other = getLink();
         if (other != null) {
-            other.connection = null;
+            if (other.connection == old)
+                other.connection = null;
             other.setIdlePowerUse(0D);
             MachineBlock.setActive(world, other.pos, false);
         }

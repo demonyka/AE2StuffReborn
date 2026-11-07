@@ -42,6 +42,23 @@ public abstract class ContainerUpgradeable extends BaseContainer {
         return netTool != null;
     }
 
+    /**
+     * The toolbox slots edit the network tool stack found when the GUI opened. Once that stack left its slot,
+     * by dropping it for example, any further change would duplicate or delete the cards in it.
+     */
+    private boolean isToolboxIntact(PlayerEntity player) {
+        // Client stacks are replaced on every sync, only the server copy can be compared
+        if (netTool == null || player.world.isRemote)
+            return true;
+        ItemStack current = player.inventory.getStackInSlot(netToolSlot);
+        return !current.isEmpty() && current == netTool.getItemStack();
+    }
+
+    @Override
+    public boolean canInteractWith(PlayerEntity player) {
+        return super.canInteractWith(player) && isToolboxIntact(player);
+    }
+
     @Override
     public ItemStack transferStackInSlot(PlayerEntity player, int index) {
         Slot slot = getSlot(index);

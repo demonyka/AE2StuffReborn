@@ -9,3 +9,5 @@ First release for Minecraft 1.16.5 with Forge 36 and Applied Energistics 2 8.4.7
 - JEI recipe transfer into the Pattern Encoder.
 - Hwyla tooltips for machine power and wireless links.
 - Rewritten for the AE2 8.x API: recipe based crafting patterns, inscriber recipes from the recipe system, new upgrade panels, wrench handling.
+- Hardened for multiplayer: no item duplication or loss through the machine GUIs and the network tool toolbox, no chunk loading by wireless links and tools, wrench dismantling respects protection mods.
+- Works with CraftTweaker, KubeJS, data packs and `/reload`.
