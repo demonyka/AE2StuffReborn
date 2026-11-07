@@ -35,6 +35,14 @@ Tested with Mekanism logistical transporters and Pretty Pipes.
 
 The settings are in `config/ae2stuff-common.toml`. Recipes are regular JSON recipes and can be changed with a data pack.
 
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Pattern Encoder](docs/screenshots/encoder.png) | ![JEI recipe transfer](docs/screenshots/jei-transfer.png) |
+| ![Advanced Inscriber](docs/screenshots/inscriber.png) | ![Wireless Connector](docs/screenshots/wireless.png) |
+| ![Network Visualisation Tool](docs/screenshots/visualiser.png) | ![Crystal Growth Chamber with Hwyla](docs/screenshots/grower-hwyla.png) |
+
 ## Differences from the 1.12 version
 
 Forced by Minecraft and Forge:
