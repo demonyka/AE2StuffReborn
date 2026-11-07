@@ -1,0 +1,23 @@
+{
+  "conditions": [
+    {
+      "type": "forge:item_exists",
+      "item": "ae2stuff:encoder"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:crafting_table"
+    },
+    {
+      "tag": "appliedenergistics2:illuminated_panel"
+    },
+    {
+      "item": "appliedenergistics2:calculation_processor"
+    }
+  ],
+  "result": {
+    "item": "ae2stuff:encoder"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "ae2stuff:block/inscriber/top",
+    "bottom": "ae2stuff:block/inscriber/top",
+    "side": "ae2stuff:block/inscriber/side_off"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "conditions": [
+    {
+      "type": "forge:item_exists",
+      "item": "ae2stuff:visualiser"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "W W",
+    "PAP",
+    "FFF"
+  ],
+  "key": {
+    "W": {
+      "item": "appliedenergistics2:wireless_receiver"
+    },
+    "P": {
+      "item": "appliedenergistics2:engineering_processor"
+    },
+    "A": {
+      "tag": "appliedenergistics2:illuminated_panel"
+    },
+    "F": {
+      "item": "appliedenergistics2:purified_fluix_crystal"
+    }
+  },
+  "result": {
+    "item": "ae2stuff:visualiser"
+  }
+}

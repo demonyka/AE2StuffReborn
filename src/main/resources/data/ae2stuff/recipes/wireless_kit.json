@@ -1,0 +1,23 @@
+{
+  "conditions": [
+    {
+      "type": "forge:item_exists",
+      "item": "ae2stuff:wireless_kit"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "appliedenergistics2:engineering_processor"
+    },
+    {
+      "item": "appliedenergistics2:wireless_receiver"
+    },
+    {
+      "item": "appliedenergistics2:network_tool"
+    }
+  ],
+  "result": {
+    "item": "ae2stuff:wireless_kit"
+  }
+}

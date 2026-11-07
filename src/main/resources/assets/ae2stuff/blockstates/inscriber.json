@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "ae2stuff:block/inscriber"
+    },
+    "active=true": {
+      "model": "ae2stuff:block/inscriber_on"
+    }
+  }
+}
