@@ -1,53 +1,82 @@
-# Публикация на Modrinth
+# Публикация на Modrinth и CurseForge
 
-## Проект (создаётся один раз)
+Проекты на площадках создаются вручную один раз. После этого каждый релиз на GitHub сам загружает мод на обе площадки через `.github/workflows/publish.yml`.
+
+## 1. Проект на Modrinth
 
 На https://modrinth.com/dashboard/projects нажми **Create a project**.
 
 | Поле | Значение |
 | --- | --- |
 | Name | AE2 Stuff Reforged |
-| URL | `ae2stuff-reforged` (свободен, проверено) |
+| URL | `ae2stuff-reforged` |
 | Summary | Pattern Encoder, Crystal Growth Chamber, Advanced Inscriber and Wireless Connector for Applied Energistics 2 on Minecraft 1.16.5. A port of bdew's AE2 Stuff. |
-| Visibility | Public |
 | Icon | `docs/icon.png` |
-| Description | текст из `docs/modrinth.md` |
+| Description | текст из `docs/description.md` |
 | Categories | Technology, Storage, Utility |
-| Client side | Required |
-| Server side | Required |
+| Client side / Server side | Required / Required |
 | License | MIT |
 | Source code | https://github.com/demonyka/AE2StuffReforged |
 | Issue tracker | https://github.com/demonyka/AE2StuffReforged/issues |
+| Gallery | `docs/screenshots/`: encoder, jei-transfer, inscriber, wireless, visualiser, grower-hwyla, creative-tab |
 
-Gallery: файлы из `docs/screenshots/`. Удачный порядок: `encoder.png`, `jei-transfer.png`, `inscriber.png`, `wireless.png`, `visualiser.png`, `grower-hwyla.png`, `creative-tab.png`.
+ID проекта (8 символов) показан в настройках проекта. Он понадобится в шаге 3.
 
-Перед публикацией Modrinth отправляет новый проект на модерацию, обычно это занимает от нескольких часов до пары дней.
+## 2. Проект на CurseForge
 
-## Версия
+На https://authors.curseforge.com/#/projects нажми **Create project**, игра Minecraft, класс Mods.
 
 | Поле | Значение |
 | --- | --- |
-| Файл | `AE2StuffReforged-1.16.5-1.0.0.jar` из релиза на GitHub или `build/libs/` |
-| Version name | AE2 Stuff Reforged 1.0.0 |
-| Version number | `1.0.0+1.16.5` |
-| Channel | Release |
-| Loaders | Forge |
-| Game versions | 1.16.5 |
-| Changelog | раздел 1.0.0 из `CHANGELOG.md` |
+| Name | AE2 Stuff Reforged |
+| Summary | то же, что на Modrinth |
+| Main category | Technology |
+| Additional categories | Applied Energistics 2, Storage |
+| Logo | `docs/icon.png` (нужно не меньше 400×400, у иконки 512×512) |
+| Description | `docs/description.md`, редактор переключи на Markdown |
+| License | MIT License |
+| Source | https://github.com/demonyka/AE2StuffReforged |
+| Issues | https://github.com/demonyka/AE2StuffReforged/issues |
+| Images | те же скриншоты из `docs/screenshots/` |
 
-Зависимости:
+Модерация CurseForge обычно занимает от нескольких часов до пары дней. Project ID виден справа на странице проекта в блоке About Project.
 
-| Проект | Тип |
-| --- | --- |
-| Applied Energistics 2 (`ae2`) | Required |
-| Just Enough Items (`jei`) | Optional |
-| Hwyla (`hwyla`) | Optional |
-| Jade (`jade`) | Optional |
+## 3. Доступ для автопубликации
 
-У AE2 на Modrinth нет файлов для 1.16.5, только на CurseForge. Зависимость всё равно стоит указать как проект, а в описании уже есть ссылка на CurseForge.
+Токены:
+
+- Modrinth: https://modrinth.com/settings/pats, создай токен с правами **Create versions** и **Write projects**.
+- CurseForge: https://authors.curseforge.com/account/api-tokens, создай токен.
+
+Добавь их в репозиторий:
+
+```
+gh variable set MODRINTH_ID --repo demonyka/AE2StuffReforged --body <ID с Modrinth>
+gh variable set CURSEFORGE_ID --repo demonyka/AE2StuffReforged --body <Project ID с CurseForge>
+gh secret set MODRINTH_TOKEN --repo demonyka/AE2StuffReforged
+gh secret set CURSEFORGE_TOKEN --repo demonyka/AE2StuffReforged
+```
+
+Площадка без токена просто пропускается, так что можно выкладывать и на одну из них.
+
+## 4. Релиз
+
+Опубликуй черновик релиза `v1.0.0` на https://github.com/demonyka/AE2StuffReforged/releases.
+Workflow **publish** соберёт jar и загрузит его так:
+
+| | Modrinth | CurseForge |
+| --- | --- | --- |
+| Версия | `1.0.0+1.16.5`, Release | то же |
+| Загрузчик и игра | Forge, 1.16.5 | Forge, 1.16.5, Java 8 |
+| Changelog | раздел из `CHANGELOG.md` | то же |
+| Applied Energistics 2 | Required | Required |
+| JEI, Hwyla, Jade | Optional | Optional |
+
+Если проекты ещё на модерации или токены не заданы, workflow упадёт. Его можно повторить вручную: вкладка Actions, **publish**, Run workflow.
+
+У AE2 на Modrinth нет файлов для 1.16.5, поэтому в описании стоит ссылка на CurseForge.
 
 ## Следующие версии
 
-1. Поменять `mod_version` в `gradle.properties` и добавить раздел в `CHANGELOG.md`.
-2. Собрать: `JAVA_HOME=<JDK 8> ./gradlew build`.
-3. Закоммитить, поставить тег `v<версия>`, выложить jar в релиз GitHub и загрузить его на Modrinth с теми же полями.
+1. Поменять `mod_version` в `gradle.properties` и добавить раздел `## <версия> - <дата>` в `CHANGELOG.md`.
+2. Закоммитить, создать тег и опубликовать релиз на GitHub. Остальное сделает workflow.
