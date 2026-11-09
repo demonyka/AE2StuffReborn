@@ -32,6 +32,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +49,9 @@ public class ItemVisualiser extends ItemLocationStore {
         World world = context.getWorld();
         BlockPos pos = context.getPos();
         PlayerEntity player = context.getPlayer();
-        if (!world.isRemote && player != null && world.getTileEntity(pos) instanceof IGridHost) {
+        if (!(world.getTileEntity(pos) instanceof IGridHost))
+            return ActionResultType.PASS;
+        if (!world.isRemote && player != null) {
             setLocation(context.getItem(), pos, world);
             player.sendStatusMessage(new TranslationTextComponent("ae2stuff.visualiser.bound", pos.getX(), pos.getY(), pos.getZ()).mergeStyle(TextFormatting.GREEN), true);
         }
@@ -94,40 +97,61 @@ public class ItemVisualiser extends ItemLocationStore {
             return;
 
         PosAndDimension boundLoc = getLocation(stack);
-        // A bound network in an unloaded chunk is not loaded just to be drawn
-        if (boundLoc == null || !boundLoc.dim.equals(PosAndDimension.dimensionOf(world)) || !world.isBlockLoaded(boundLoc.pos)
-                || !VisualiserPlayerTracker.needToUpdate(player, boundLoc))
+        IGrid grid = findGrid(boundLoc, world);
+        if (grid == null) {
+            if (VisualiserPlayerTracker.needToClear(player))
+                NetHandler.sendTo(new MsgVisualisationData(new VisualisationData()), player);
             return;
+        }
+        if (VisualiserPlayerTracker.needToUpdate(player, boundLoc))
+            NetHandler.sendTo(new MsgVisualisationData(buildData(grid, world)), player);
+    }
 
+    @Nullable
+    private static IGrid findGrid(@Nullable PosAndDimension boundLoc, World world) {
+        // A bound network in an unloaded chunk is not loaded just to be drawn
+        if (boundLoc == null || !boundLoc.dim.equals(PosAndDimension.dimensionOf(world)) || !world.isBlockLoaded(boundLoc.pos))
+            return null;
         TileEntity tile = world.getTileEntity(boundLoc.pos);
         if (!(tile instanceof IGridHost))
-            return;
+            return null;
         IGridNode hostNode = ((IGridHost) tile).getGridNode(AEPartLocation.INTERNAL);
-        IGrid grid = hostNode != null ? hostNode.getGrid() : null;
-        if (grid != null)
-            NetHandler.sendTo(new MsgVisualisationData(buildData(grid, world)), player);
+        return hostNode != null ? hostNode.getGrid() : null;
     }
 
     private static VisualisationData buildData(IGrid grid, World world) {
         Set<IGridConnection> connections = new HashSet<>();
-        Map<IGridNode, VNode> nodes = new LinkedHashMap<>();
+        Map<IGridNode, VNode> nodes = new HashMap<>();
+        // Parts and their cable share a position, each distinct node is sent once
+        Map<VNode, VNode> unique = new LinkedHashMap<>();
 
         for (IGridNode node : grid.getNodes()) {
             IGridBlock block = node.getGridBlock();
             if (block.isWorldAccessible() && block.getLocation().isInWorld(world)) {
                 DimensionalCoord loc = block.getLocation();
-                node.getConnections().forEach(connections::add);
                 int flags = 0;
                 if (!node.meetsChannelRequirements())
                     flags |= VisualisationData.NODE_MISSING;
                 if (node.hasFlag(GridFlags.DENSE_CAPACITY))
                     flags |= VisualisationData.NODE_DENSE;
-                nodes.put(node, new VNode(loc.x, loc.y, loc.z, flags));
+                VNode vnode = new VNode(loc.x, loc.y, loc.z, flags);
+                VNode existing = unique.get(vnode);
+                if (existing == null) {
+                    // A huge network is shown partially rather than overflowing the packet
+                    if (unique.size() >= VisualisationData.MAX_NODES)
+                        continue;
+                    unique.put(vnode, vnode);
+                    existing = vnode;
+                }
+                nodes.put(node, existing);
+                node.getConnections().forEach(connections::add);
             }
         }
 
         List<VLink> links = new ArrayList<>();
         for (IGridConnection connection : connections) {
+            if (links.size() >= VisualisationData.MAX_LINKS)
+                break;
             VNode node1 = nodes.get(connection.a());
             VNode node2 = nodes.get(connection.b());
             if (node1 != null && node2 != null && !node1.equals(node2)) {
@@ -136,11 +160,11 @@ public class ItemVisualiser extends ItemLocationStore {
                     flags |= VisualisationData.LINK_DENSE;
                 if (connection.a().hasFlag(GridFlags.CANNOT_CARRY_COMPRESSED) && connection.b().hasFlag(GridFlags.CANNOT_CARRY_COMPRESSED))
                     flags |= VisualisationData.LINK_COMPRESSED;
-                links.add(new VLink(node1, node2, (byte) connection.getUsedChannels(), flags));
+                links.add(new VLink(node1, node2, connection.getUsedChannels(), flags));
             }
         }
 
-        return new VisualisationData(new ArrayList<>(nodes.values()), links);
+        return new VisualisationData(new ArrayList<>(unique.values()), links);
     }
 
     @Override

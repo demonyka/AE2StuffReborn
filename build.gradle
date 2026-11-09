@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.77'
     }
 }
 
@@ -40,6 +40,7 @@ minecraft {
 }
 
 repositories {
+    mavenCentral()
     maven {
         name = 'modmaven'
         url = 'https://modmaven.dev/'
@@ -60,6 +61,12 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
 
     implementation fg.deobf("curse.maven:hwyla-253449:${hwyla_file}")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 processResources {

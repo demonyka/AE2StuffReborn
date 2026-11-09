@@ -72,7 +72,14 @@ public final class OverlayRenderHandler {
         RenderSystem.enableTexture();
     }
 
-    static void renderFloatingText(MatrixStack matrices, String text, double x, double y, double z, int color) {
+    /**
+     * Buffer for {@link #renderFloatingText}, the caller draws all queued text with one finish()
+     */
+    static IRenderTypeBuffer.Impl textBuffer() {
+        return IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+    }
+
+    static void renderFloatingText(MatrixStack matrices, IRenderTypeBuffer buffer, String text, double x, double y, double z, int color) {
         Minecraft mc = Minecraft.getInstance();
         FontRenderer font = mc.fontRenderer;
 
@@ -81,10 +88,8 @@ public final class OverlayRenderHandler {
         matrices.rotate(mc.getRenderManager().getCameraOrientation());
         matrices.scale(-TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
 
-        IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
         font.renderString(text, -font.getStringWidth(text) / 2F, TEXT_Y_OFFSET, color, false,
                 matrices.getLast().getMatrix(), buffer, true, TEXT_BACKGROUND, FULL_BRIGHT);
-        buffer.finish();
 
         matrices.pop();
     }

@@ -62,6 +62,7 @@ gh secret set CURSEFORGE_TOKEN --repo demonyka/AE2StuffReforged
 ## 4. Релиз
 
 Опубликуй черновик релиза `v1.0.0` на https://github.com/demonyka/AE2StuffReforged/releases.
+Тег должен быть `v` плюс `mod_version` из `gradle.properties`, иначе workflow остановится до сборки.
 Workflow **publish** соберёт jar и загрузит его так:
 
 | | Modrinth | CurseForge |

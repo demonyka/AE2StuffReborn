@@ -2,6 +2,7 @@ package net.bdew.ae2stuff.machines.encoder;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
+import appeng.api.networking.energy.IEnergyGrid;
 import appeng.api.networking.events.MENetworkEventSubscribe;
 import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.storage.IStorageGrid;
@@ -199,6 +200,15 @@ public class TileEncoder extends InventoryGridTile {
         if (tag != null && tag.toString().length() > MAX_UNTRUSTED_TAG_LENGTH)
             copy.setTag(null);
         return copy;
+    }
+
+    /**
+     * Unlike isNodeActive this stays true while the network boots, which it does after every change to it.
+     */
+    public boolean isOnline() {
+        IGridNode gridNode = getNode();
+        IGrid grid = gridNode != null ? gridNode.getGrid() : null;
+        return grid != null && grid.<IEnergyGrid>getCache(IEnergyGrid.class).isNetworkPowered();
     }
 
     // Inventory stuff

@@ -141,9 +141,7 @@ public abstract class MachineBlock extends Block {
     @Override
     @SuppressWarnings("deprecation")
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-        Float explosionRadius = builder.get(LootParameters.EXPLOSION_RADIUS);
-        if (explosionRadius != null && builder.getWorld().rand.nextFloat() > 1F / explosionRadius)
-            return Collections.emptyList();
+        // No explosion decay, like shulker boxes the dropped block carries the whole inventory
         return Collections.singletonList(getSavedBlock(builder.get(LootParameters.BLOCK_ENTITY)));
     }
 

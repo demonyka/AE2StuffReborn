@@ -6,6 +6,7 @@ import net.bdew.ae2stuff.misc.SlotValidating;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IntReferenceHolder;
+import net.minecraft.util.math.MathHelper;
 
 public class ContainerInscriber extends ContainerUpgradeable {
     // Window properties are sent as shorts, so the float progress goes through a fixed scale
@@ -35,7 +36,8 @@ public class ContainerInscriber extends ContainerUpgradeable {
         trackInt(new IntReferenceHolder() {
             @Override
             public int get() {
-                return Math.round(te.progress * PROGRESS_SCALE) + SYNC_OFFSET;
+                // Speed cards can push the progress past 1 for a tick, enough to overflow the short
+                return Math.round(MathHelper.clamp(te.progress, 0F, 1F) * PROGRESS_SCALE) + SYNC_OFFSET;
             }
 
             @Override

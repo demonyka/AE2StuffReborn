@@ -54,6 +54,7 @@ public class TileGrower extends PoweredTile {
             if (powerStored >= needPower) {
                 int certPos = findChargedCertus();
 
+                // Slots are set directly with a single markDirty, it updates comparators and dirties the chunk each time
                 for (int slot = 0; slot < inv.size(); slot++) {
                     ItemStack stack = inv.get(slot);
                     if (!stack.isEmpty() && stack.getItem() instanceof IGrowableCrystal) {
@@ -61,10 +62,12 @@ public class TileGrower extends PoweredTile {
                         ItemStack grown = stack;
                         for (int i = 0; i <= speed; i++)
                             grown = crystal.triggerGrowth(stack);
-                        setInventorySlotContents(slot, grown);
+                        inv.set(slot, grown);
                         hadWork = true;
                     }
                 }
+                if (hadWork)
+                    markDirty();
 
                 int redstonePos = ItemUtils.findItemInInventory(this, REDSTONE_DUST);
                 int netherPos = ItemUtils.findItemInInventory(this, NETHER_QUARTZ);

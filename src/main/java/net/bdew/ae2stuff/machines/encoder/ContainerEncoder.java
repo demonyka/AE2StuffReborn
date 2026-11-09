@@ -107,7 +107,7 @@ public class ContainerEncoder extends BaseContainer {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        if (player instanceof ServerPlayerEntity && !te.isNodeActive())
+        if (player instanceof ServerPlayerEntity && !te.isOnline())
             ((ServerPlayerEntity) player).closeScreen();
     }
 }

@@ -19,6 +19,10 @@ public final class VisualisationData {
     public static final int LINK_DENSE = 1;
     public static final int LINK_COMPRESSED = 1 << 1;
 
+    // Keeps the packet below the 1 MiB custom payload limit: 13 bytes per node, at most 14 per link
+    public static final int MAX_NODES = 32768;
+    public static final int MAX_LINKS = 32768;
+
     public final List<VNode> nodes;
     public final List<VLink> links;
 
@@ -46,7 +50,7 @@ public final class VisualisationData {
         for (VLink link : links) {
             buf.writeInt(nodeIndexes.get(link.node1));
             buf.writeInt(nodeIndexes.get(link.node2));
-            buf.writeByte(link.channels);
+            buf.writeVarInt(link.channels);
             buf.writeByte(link.flags);
         }
     }
@@ -65,7 +69,7 @@ public final class VisualisationData {
         for (int i = 0; i < linkCount; i++) {
             VNode node1 = nodes.get(buf.readInt());
             VNode node2 = nodes.get(buf.readInt());
-            byte channels = buf.readByte();
+            int channels = buf.readVarInt();
             links.add(new VLink(node1, node2, channels, buf.readByte()));
         }
         return new VisualisationData(nodes, links);
@@ -105,10 +109,10 @@ public final class VisualisationData {
     public static final class VLink {
         public final VNode node1;
         public final VNode node2;
-        public final byte channels;
+        public final int channels;
         public final int flags;
 
-        public VLink(VNode node1, VNode node2, byte channels, int flags) {
+        public VLink(VNode node1, VNode node2, int channels, int flags) {
             this.node1 = node1;
             this.node2 = node2;
             this.channels = channels;

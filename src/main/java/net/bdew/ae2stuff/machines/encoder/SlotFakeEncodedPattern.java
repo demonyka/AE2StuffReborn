@@ -15,19 +15,28 @@ public class SlotFakeEncodedPattern extends Slot implements SlotClickable {
         this.te = te;
     }
 
+    // All clicks go through onClick, this keeps vanilla paths like double-click collecting away from the fake stack
+    @Override
+    public boolean canTakeStack(PlayerEntity player) {
+        return false;
+    }
+
+    @Override
+    public boolean isItemValid(ItemStack stack) {
+        return false;
+    }
+
     @Override
     public ItemStack onClick(ClickType clickType, int button, PlayerEntity player) {
         // A recipe removed by /reload must not turn a blank pattern into a dead one
         te.revalidateRecipe();
-        ItemStack encoded = te.getStackInSlot(getSlotIndex());
-        if (!encoded.isEmpty()) {
+        ItemStack encoded = te.getStackInSlot(getSlotIndex()).copy();
+        if (!encoded.isEmpty() && !te.getStackInSlot(TileEncoder.SLOT_PATTERNS).isEmpty()) {
             if (clickType == ClickType.PICKUP) {
-                if (player.inventory.getItemStack().isEmpty()) {
-                    player.inventory.setItemStack(encoded.copy());
-                    te.decrStackSize(TileEncoder.SLOT_PATTERNS, 1);
-                }
+                if (player.inventory.getItemStack().isEmpty() && !te.decrStackSize(TileEncoder.SLOT_PATTERNS, 1).isEmpty())
+                    player.inventory.setItemStack(encoded);
             } else if (clickType == ClickType.QUICK_MOVE) {
-                if (ItemUtils.addStackToSlots(encoded.copy(), player.inventory, 0, player.inventory.getSizeInventory(), true).isEmpty())
+                if (ItemUtils.addStackToSlots(encoded, player.inventory, 0, player.inventory.mainInventory.size(), true).isEmpty())
                     te.decrStackSize(TileEncoder.SLOT_PATTERNS, 1);
             }
         }

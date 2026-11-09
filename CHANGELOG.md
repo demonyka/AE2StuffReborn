@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.1 - 2026-11-10
+
+Bug fixes for multiplayer servers and translation updates.
+
+- Wireless Connector no longer draws power for a link whose other end is not loaded.
+- A Wireless Connector whose partner was removed now clears its link by itself. Breaking or re-linking a connector no longer loads the chunk of the other end.
+- Machines always drop with their contents when blown up.
+- An empty machine stacks with newly crafted ones again after being picked up.
+- The Pattern Encoder screen no longer closes while the ME network is rebooting.
+- Shift-clicking an encoded pattern with a full inventory no longer puts it into an armor or off-hand slot.
+- Idle machines no longer update their block twice every 5 seconds: less chunk saving and no more observer pulses.
+- Crystal Growth Chamber causes fewer block updates while growing.
+- Network Visualisation Tool:
+  - The overlay is cleared when the bound network is not available, is in another dimension, or after leaving the server.
+  - Very large networks no longer risk a disconnect.
+  - Channel counts above 127 are shown correctly.
+  - Channel labels are cheaper to draw and are shown within 64 blocks.
+  - Right-clicking a non-ME block with the tool no longer swings or blocks the item in the off-hand.
+- Completed the German, Italian, Korean, Brazilian Portuguese and Chinese translations.
+
 ## 1.0.0 - 2026-11-07
 
 First release for Minecraft 1.16.5 with Forge 36 and Applied Energistics 2 8.4.7.

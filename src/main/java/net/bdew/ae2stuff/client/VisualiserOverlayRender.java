@@ -10,11 +10,14 @@ import net.bdew.ae2stuff.items.visualiser.VisualisationData.VNode;
 import net.bdew.ae2stuff.items.visualiser.VisualisationModes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Set;
 
 public final class VisualiserOverlayRender implements WorldOverlayRenderer {
     private static final double SIZE = 0.2D;
+    private static final double LABEL_DISTANCE = 64D;
 
     private static final Set<VisualisationModes> RENDER_NODES_MODES =
             EnumSet.of(VisualisationModes.NODES, VisualisationModes.FULL, VisualisationModes.NONUM);
@@ -42,6 +46,18 @@ public final class VisualiserOverlayRender implements WorldOverlayRenderer {
         currentLinks = data;
         dense = newDense;
         normal = newNormal;
+    }
+
+    // The server only sends data while a visualiser is held, so data from another world must not linger
+    @SubscribeEvent
+    public static void handleLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        setData(new VisualisationData());
+    }
+
+    // Fired on dimension changes too
+    @SubscribeEvent
+    public static void handleRespawn(ClientPlayerNetworkEvent.RespawnEvent event) {
+        setData(new VisualisationData());
     }
 
     private static final class Quads {
@@ -184,14 +200,18 @@ public final class VisualiserOverlayRender implements WorldOverlayRenderer {
         OverlayRenderHandler.endOverlay();
 
         if (mode == VisualisationModes.FULL) {
+            IRenderTypeBuffer.Impl buffer = OverlayRenderHandler.textBuffer();
             for (VLink link : currentLinks.links) {
-                if (link.channels > 0) {
-                    OverlayRenderHandler.renderFloatingText(matrices, Integer.toString(link.channels),
-                            (link.node1.x + link.node2.x) / 2D + 0.5D - camera.x,
-                            (link.node1.y + link.node2.y) / 2D + 0.5D - camera.y,
-                            (link.node1.z + link.node2.z) / 2D + 0.5D - camera.z, 0xFFFFFF);
-                }
+                if (link.channels <= 0)
+                    continue;
+                double x = (link.node1.x + link.node2.x) / 2D + 0.5D - camera.x;
+                double y = (link.node1.y + link.node2.y) / 2D + 0.5D - camera.y;
+                double z = (link.node1.z + link.node2.z) / 2D + 0.5D - camera.z;
+                if (x * x + y * y + z * z > LABEL_DISTANCE * LABEL_DISTANCE)
+                    continue;
+                OverlayRenderHandler.renderFloatingText(matrices, buffer, Integer.toString(link.channels), x, y, z, 0xFFFFFF);
             }
+            buffer.finish();
         }
     }
 }

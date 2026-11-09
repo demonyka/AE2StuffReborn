@@ -43,8 +43,10 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
 
     @Override
     public final void tick() {
-        if (world != null && !world.isRemote)
+        if (world != null && !world.isRemote) {
             serverTick();
+            serverTickEnd();
+        }
     }
 
     protected void serverTick() {
@@ -56,6 +58,12 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
             gridNode.updateState();
             initialized = true;
         }
+    }
+
+    /**
+     * Runs after serverTick of all subclasses.
+     */
+    protected void serverTickEnd() {
     }
 
     protected void saveData(CompoundNBT tag) {
@@ -124,8 +132,8 @@ public abstract class GridTile extends TileEntity implements ITickableTileEntity
 
     @Nullable
     public IGridNode getNode() {
-        // A removed tile must not create a node that nothing would ever destroy
-        if (world == null || world.isRemote || isRemoved())
+        // A removed or unloaded tile must not create a node that nothing would ever destroy
+        if (world == null || world.isRemote || isRemoved() || chunkUnloaded)
             return null;
         if (node == null) {
             node = AE2Defs.api().grid().createGridNode(this);

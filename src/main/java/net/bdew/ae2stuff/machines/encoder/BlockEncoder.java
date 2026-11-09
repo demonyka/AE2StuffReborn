@@ -89,7 +89,7 @@ public class BlockEncoder extends MachineBlock {
     @Override
     protected boolean onBlockActivatedReal(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         TileEntity tile = world.getTileEntity(pos);
-        if (tile instanceof TileEncoder && ((TileEncoder) tile).isNodeActive()) {
+        if (tile instanceof TileEncoder && ((TileEncoder) tile).isOnline()) {
             TileEncoder encoder = (TileEncoder) tile;
             openContainer(player, pos, (id, inventory, p) -> new ContainerEncoder(id, inventory, encoder));
         } else {

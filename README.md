@@ -50,7 +50,7 @@ Forced by Minecraft and Forge:
 - `tuning.cfg` became `config/ae2stuff-common.toml` with the same options and defaults.
 - `recipes.cfg` became JSON recipes, override them with a data pack.
 - Tool bindings store the dimension by name.
-- Waila support targets Hwyla, so Jade works as well.
+- Waila support targets Hwyla, so Jade is expected to work as well, but it is untested.
 
 Forced by AE2 8.x:
 
@@ -64,6 +64,7 @@ Fixed compared to the original, for multiplayer servers:
 
 - Machine contents and network tool cards can no longer be duplicated or lost through the GUI.
 - A machine broken by a network security violation keeps its contents in the dropped block.
+- A machine destroyed by an explosion always drops with its contents.
 - The wireless connector, the setup kit and the visualiser no longer load chunks, and an unloaded link stops drawing power.
 - The wrench dismantle fires a block break event, so claim and protection mods can stop it.
 - JEI recipe transfer stays within one network packet, even for recipes with very large tags.

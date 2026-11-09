@@ -6,6 +6,8 @@ import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.energy.IAEPowerStorage;
 import appeng.api.networking.energy.IEnergyGrid;
 import appeng.api.networking.events.MENetworkPowerStorage;
+import net.bdew.ae2stuff.misc.MachineBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.MathHelper;
@@ -50,15 +52,20 @@ public abstract class PoweredTile extends InventoryGridTile implements IAEPowerS
     }
 
     public void sleep() {
-        if (!sleeping)
-            setBlockActive(false);
         sleeping = true;
     }
 
     public void wakeup() {
-        if (sleeping)
-            setBlockActive(true);
         sleeping = false;
+    }
+
+    // The forced wakeup above is usually undone in the same tick, so the block is only updated once the tick is over
+    @Override
+    protected void serverTickEnd() {
+        super.serverTickEnd();
+        BlockState state = getBlockState();
+        if (state.getBlock() instanceof MachineBlock && state.get(MachineBlock.ACTIVE) != isAwake())
+            setBlockActive(isAwake());
     }
 
     @Override

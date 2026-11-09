@@ -13,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerEncoder> {
     @Override
@@ -28,7 +30,9 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerE
             return null;
 
         List<List<ItemStack>> slots = new ArrayList<>();
-        for (IGuiIngredient<ItemStack> ingredient : recipeLayout.getItemStacks().getGuiIngredients().values()) {
+        // The grid position comes from the slot index, the map gives no order
+        Map<Integer, ? extends IGuiIngredient<ItemStack>> bySlot = new TreeMap<>(recipeLayout.getItemStacks().getGuiIngredients());
+        for (IGuiIngredient<ItemStack> ingredient : bySlot.values()) {
             if (!ingredient.isInput())
                 continue;
             List<ItemStack> options = new ArrayList<>();

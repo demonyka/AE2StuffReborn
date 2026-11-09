@@ -49,9 +49,12 @@ public class TileWireless extends GridTile {
         return connection;
     }
 
+    /**
+     * The other end, or null when it is gone or its chunk is not loaded. Never loads the chunk.
+     */
     @Nullable
     private TileWireless getLink() {
-        if (link == null)
+        if (link == null || !world.isBlockLoaded(link))
             return null;
         TileEntity tile = world.getTileEntity(link);
         return tile instanceof TileWireless ? (TileWireless) tile : null;
@@ -101,32 +104,43 @@ public class TileWireless extends GridTile {
     public void doUnlink() {
         breakConnection();
         TileWireless that = getLink();
-        if (that != null) {
-            setLink(null);
+        if (that != null && pointsBack(that))
             that.setLink(null);
-        }
+        // An unloaded other end clears its own link once it loads and finds this one not pointing back
+        if (link != null)
+            setLink(null);
+    }
+
+    private boolean pointsBack(TileWireless that) {
+        return pos.equals(that.link);
     }
 
     private boolean setupConnection() {
+        if (link == null || !world.isBlockLoaded(link))
+            return false;
         TileWireless that = getLink();
-        if (that != null) {
-            try {
-                connection = AE2Defs.api().grid().createGridConnection(getNode(), that.getNode());
-                that.connection = connection;
-                // Not BlockPos#distanceSq, on 1.16 that offsets only one of the two positions by 0.5
-                double dx = pos.getX() - that.pos.getX();
-                double dy = pos.getY() - that.pos.getY();
-                double dz = pos.getZ() - that.pos.getZ();
-                double power = Tuning.WIRELESS_POWER_BASE.get() + Tuning.WIRELESS_POWER_DISTANCE_MULTIPLIER.get() * (dx * dx + dy * dy + dz * dz);
-                setIdlePowerUse(power);
-                that.setIdlePowerUse(power);
-                MachineBlock.setActive(world, pos, true);
-                MachineBlock.setActive(world, that.pos, true);
-                return true;
-            } catch (Exception e) {
-                AE2Stuff.LOG.warn("Failed setting up wireless link {} <-> {}", pos, that.pos, e);
-                doUnlink();
-            }
+        if (that == null || !pointsBack(that)) {
+            // The other end was removed or relinked while this one was unloaded. Connecting to whatever is
+            // there now would skip the security checks of the setup kit.
+            setLink(null);
+            return false;
+        }
+        try {
+            connection = AE2Defs.api().grid().createGridConnection(getNode(), that.getNode());
+            that.connection = connection;
+            // Not BlockPos#distanceSq, on 1.16 that offsets only one of the two positions by 0.5
+            double dx = pos.getX() - that.pos.getX();
+            double dy = pos.getY() - that.pos.getY();
+            double dz = pos.getZ() - that.pos.getZ();
+            double power = Tuning.WIRELESS_POWER_BASE.get() + Tuning.WIRELESS_POWER_DISTANCE_MULTIPLIER.get() * (dx * dx + dy * dy + dz * dz);
+            setIdlePowerUse(power);
+            that.setIdlePowerUse(power);
+            MachineBlock.setActive(world, pos, true);
+            MachineBlock.setActive(world, that.pos, true);
+            return true;
+        } catch (Exception e) {
+            AE2Stuff.LOG.warn("Failed setting up wireless link {} <-> {}", pos, that.pos, e);
+            doUnlink();
         }
         return false;
     }
@@ -139,7 +153,7 @@ public class TileWireless extends GridTile {
         connection = null;
         setIdlePowerUse(0D);
         TileWireless other = getLink();
-        if (other != null) {
+        if (other != null && pointsBack(other)) {
             if (other.connection == old)
                 other.connection = null;
             other.setIdlePowerUse(0D);
@@ -180,14 +194,13 @@ public class TileWireless extends GridTile {
     protected void saveData(CompoundNBT tag) {
         super.saveData(tag);
         writeLink(tag);
-        tag.putDouble("_poweruse", currentPowerUsage);
     }
 
+    // The power use is not saved, a loaded end has no connection yet and setupConnection sets it again
     @Override
     protected void loadData(CompoundNBT tag) {
         super.loadData(tag);
         readLink(tag);
-        setIdlePowerUse(tag.getDouble("_poweruse"));
     }
 
     // The link is synced to clients for the overlay

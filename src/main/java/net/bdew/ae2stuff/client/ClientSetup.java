@@ -14,6 +14,7 @@ public final class ClientSetup {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::clientSetup);
         MinecraftForge.EVENT_BUS.register(OverlayRenderHandler.class);
         MinecraftForge.EVENT_BUS.register(MouseEventHandler.class);
+        MinecraftForge.EVENT_BUS.register(VisualiserOverlayRender.class);
         OverlayRenderHandler.register(new WirelessOverlayRender());
         OverlayRenderHandler.register(new VisualiserOverlayRender());
     }

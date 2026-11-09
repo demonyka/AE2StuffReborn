@@ -1,6 +1,6 @@
 A port of bdew's **AE2 Stuff** to Minecraft 1.16.5 and Applied Energistics 2 8.x. Same machines, same recipes, same behaviour as the 1.12 version.
 
-**Requires [Applied Energistics 2](https://www.curseforge.com/minecraft/mc-mods/applied-energistics-2) 8.4.7** (on CurseForge, Modrinth has no AE2 for 1.16.5). JEI and Hwyla/Jade are optional.
+**Requires [Applied Energistics 2](https://www.curseforge.com/minecraft/mc-mods/applied-energistics-2) 8.4.7** (on CurseForge, Modrinth only has AE2 for 1.18 and newer). JEI and Hwyla are optional, Jade is expected to work but untested.
 
 ## Machines
 

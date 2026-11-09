@@ -6,6 +6,7 @@ import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
@@ -68,11 +69,20 @@ public abstract class InventoryGridTile extends GridTile implements ISidedInvent
         }
     }
 
-    public final void saveToItem(ItemStack stack) {
+    private CompoundNBT writeItemData() {
         CompoundNBT data = new CompoundNBT();
         saveData(data);
         // The grid node stays with the world, a placed copy has to join the network on its own
         data.remove("ae_node");
+        return data;
+    }
+
+    public final void saveToItem(ItemStack stack) {
+        CompoundNBT data = writeItemData();
+        // A machine that holds nothing must stack with crafted ones
+        TileEntity pristine = getType().create();
+        if (pristine instanceof InventoryGridTile && data.equals(((InventoryGridTile) pristine).writeItemData()))
+            return;
         stack.getOrCreateTag().put(ITEM_DATA_TAG, data);
     }
 
