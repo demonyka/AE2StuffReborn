@@ -1,4 +1,4 @@
-# AE2 Stuff Reforged (Minecraft 1.16.5)
+# AE2 Stuff Reborn (Minecraft 1.16.5)
 
 [English](README.md)
 
@@ -30,7 +30,7 @@
 JAVA_HOME=<путь к JDK 8> ./gradlew build
 ```
 
-Готовый мод появится в `build/libs/AE2StuffReforged-1.16.5-<версия>.jar`. Для запуска в среде разработки есть задачи `runClient` и `runServer`.
+Готовый мод появится в `build/libs/AE2Stuff-1.16.5-<версия>.jar`. Для запуска в среде разработки есть задачи `runClient` и `runServer`.
 
 ## Что изменилось из-за Minecraft и Forge
 

@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/icon.png" width="128" alt="AE2 Stuff Reforged"></p>
+<p align="center"><img src="docs/icon.png" width="128" alt="AE2 Stuff Reborn"></p>
 
-# AE2 Stuff Reforged
+# AE2 Stuff Reborn
 
 [Русский](README.ru.md)
 

@@ -45,8 +45,8 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: ${{ vars.CURSEFORGE_ID }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          files: build/libs/AE2StuffReforged-*.jar
-          name: AE2 Stuff Reforged ${{ steps.meta.outputs.version }}
+          files: build/libs/AE2Stuff-*.jar
+          name: AE2 Stuff Reborn ${{ steps.meta.outputs.version }}
           version: ${{ steps.meta.outputs.version }}+${{ steps.meta.outputs.minecraft }}
           version-type: release
           changelog-file: release-changelog.md

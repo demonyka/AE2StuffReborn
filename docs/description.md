@@ -31,4 +31,4 @@ Links two points of an ME network without cables. Carries 32 channels and draws 
 
 ## Credits
 
-AE2 Stuff was created by **bdew**. Ported to 1.16.5 by **demonyga**. MIT licensed, source on [GitHub](https://github.com/demonyka/AE2StuffReforged).
+AE2 Stuff was created by **bdew**. Ported to 1.16.5 by **demonyga**. MIT licensed, source on [GitHub](https://github.com/demonyka/AE2StuffReborn).

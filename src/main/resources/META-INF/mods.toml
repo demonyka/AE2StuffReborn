@@ -1,13 +1,13 @@
 modLoader="javafml"
 loaderVersion="[36,)"
 license="MIT"
-issueTrackerURL="https://github.com/demonyka/AE2StuffReforged/issues"
+issueTrackerURL="https://github.com/demonyka/AE2StuffReborn/issues"
 
 [[mods]]
 modId="ae2stuff"
 version="${version}"
-displayName="AE2 Stuff Reforged"
-displayURL="https://github.com/demonyka/AE2StuffReforged"
+displayName="AE2 Stuff"
+displayURL="https://github.com/demonyka/AE2StuffReborn"
 logoFile="icon.png"
 authors="bdew, demonyga"
 credits="Original AE2 Stuff by bdew. Port to Minecraft 1.16.5 by demonyga."

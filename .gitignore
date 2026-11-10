@@ -12,3 +12,6 @@ bin/
 .classpath
 .project
 logs/
+
+# Local secrets
+.env

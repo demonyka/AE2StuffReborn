@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 - 2026-11-10
+
+The project is now called AE2 Stuff Reborn. No gameplay changes.
+
+- The mod is listed as AE2 Stuff in the mod list, and the jar is named AE2Stuff-1.16.5-<version>.jar.
+- Source code moved to https://github.com/demonyka/AE2StuffReborn.
+
 ## 1.0.1 - 2026-11-10
 
 Bug fixes for multiplayer servers and translation updates.

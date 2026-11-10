@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 
 version = "${minecraft_version}-${mod_version}"
 group = 'net.bdew.ae2stuff'
-archivesBaseName = 'AE2StuffReforged'
+archivesBaseName = 'AE2Stuff'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 

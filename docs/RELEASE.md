@@ -8,16 +8,16 @@
 
 | Поле | Значение |
 | --- | --- |
-| Name | AE2 Stuff Reforged |
-| URL | `ae2stuff-reforged` |
+| Name | AE2 Stuff Reborn |
+| URL | `ae2stuff-reborn` |
 | Summary | Pattern Encoder, Crystal Growth Chamber, Advanced Inscriber and Wireless Connector for Applied Energistics 2 on Minecraft 1.16.5. A port of bdew's AE2 Stuff. |
 | Icon | `docs/icon.png` |
 | Description | текст из `docs/description.md` |
 | Categories | Technology, Storage, Utility |
 | Client side / Server side | Required / Required |
 | License | MIT |
-| Source code | https://github.com/demonyka/AE2StuffReforged |
-| Issue tracker | https://github.com/demonyka/AE2StuffReforged/issues |
+| Source code | https://github.com/demonyka/AE2StuffReborn |
+| Issue tracker | https://github.com/demonyka/AE2StuffReborn/issues |
 | Gallery | `docs/screenshots/`: encoder, jei-transfer, inscriber, wireless, visualiser, grower-hwyla, creative-tab |
 
 ID проекта (8 символов) показан в настройках проекта. Он понадобится в шаге 3.
@@ -28,15 +28,15 @@ ID проекта (8 символов) показан в настройках п
 
 | Поле | Значение |
 | --- | --- |
-| Name | AE2 Stuff Reforged |
+| Name | AE2 Stuff Reborn |
 | Summary | то же, что на Modrinth |
 | Main category | Technology |
 | Additional categories | Applied Energistics 2, Storage |
 | Logo | `docs/icon.png` (нужно не меньше 400×400, у иконки 512×512) |
 | Description | `docs/description.md`, редактор переключи на Markdown |
 | License | MIT License |
-| Source | https://github.com/demonyka/AE2StuffReforged |
-| Issues | https://github.com/demonyka/AE2StuffReforged/issues |
+| Source | https://github.com/demonyka/AE2StuffReborn |
+| Issues | https://github.com/demonyka/AE2StuffReborn/issues |
 | Images | те же скриншоты из `docs/screenshots/` |
 
 Модерация CurseForge обычно занимает от нескольких часов до пары дней. Project ID виден справа на странице проекта в блоке About Project.
@@ -51,17 +51,17 @@ ID проекта (8 символов) показан в настройках п
 Добавь их в репозиторий:
 
 ```
-gh variable set MODRINTH_ID --repo demonyka/AE2StuffReforged --body <ID с Modrinth>
-gh variable set CURSEFORGE_ID --repo demonyka/AE2StuffReforged --body <Project ID с CurseForge>
-gh secret set MODRINTH_TOKEN --repo demonyka/AE2StuffReforged
-gh secret set CURSEFORGE_TOKEN --repo demonyka/AE2StuffReforged
+gh variable set MODRINTH_ID --repo demonyka/AE2StuffReborn --body <ID с Modrinth>
+gh variable set CURSEFORGE_ID --repo demonyka/AE2StuffReborn --body <Project ID с CurseForge>
+gh secret set MODRINTH_TOKEN --repo demonyka/AE2StuffReborn
+gh secret set CURSEFORGE_TOKEN --repo demonyka/AE2StuffReborn
 ```
 
 Площадка без токена просто пропускается, так что можно выкладывать и на одну из них.
 
 ## 4. Релиз
 
-Опубликуй черновик релиза `v1.0.0` на https://github.com/demonyka/AE2StuffReforged/releases.
+Опубликуй черновик релиза `v1.0.0` на https://github.com/demonyka/AE2StuffReborn/releases.
 Тег должен быть `v` плюс `mod_version` из `gradle.properties`, иначе workflow остановится до сборки.
 Workflow **publish** соберёт jar и загрузит его так:
 
